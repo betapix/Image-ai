@@ -89,24 +89,33 @@ fun ResultScreen(pollinatorViewModel: PollinatorViewModel) {
             Row(
                 modifier = Modifier
                     .padding(top = 32.dp, bottom = 16.dp, start = 8.dp, end = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Image(
-                    painter = painterResource(R.drawable.button_download), // Replace with your save icon
+                    painter = painterResource(R.drawable.button_download),
                     contentDescription = stringResource(R.string.label_save),
                     modifier = Modifier
                         .size(36.dp)
                         .weight(1f)
-                        .clickable { pollinatorViewModel.saveImage(context) } // Add the click action
+                        .clickable { pollinatorViewModel.saveImage(context) }
                 )
 
                 Image(
-                    painter = painterResource(R.drawable.button_close), // Replace with your discard icon
+                    painter = painterResource(R.drawable.button_wallpaper),
+                    contentDescription = stringResource(R.string.label_wallpaper),
+                    modifier = Modifier
+                        .size(36.dp)
+                        .weight(1f)
+                        .clickable { pollinatorViewModel.setAsWallpaper(context) }
+                )
+
+                Image(
+                    painter = painterResource(R.drawable.button_close),
                     contentDescription = stringResource(R.string.label_discard),
                     modifier = Modifier
                         .size(36.dp)
                         .weight(1f)
-                        .clickable { pollinatorViewModel.closeDisplay() } // Add the click action
+                        .clickable { pollinatorViewModel.closeDisplay() }
                 )
             }
         }

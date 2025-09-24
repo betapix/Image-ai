@@ -63,6 +63,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.okhttp)
+    
+    // AdMob dependencies
+    implementation("com.google.android.gms:play-services-ads:22.6.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

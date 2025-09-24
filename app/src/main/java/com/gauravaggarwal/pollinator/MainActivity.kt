@@ -32,11 +32,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import com.gauravaggarwal.pollinator.data.PollinationsAiRepository
 import com.gauravaggarwal.pollinator.ui.PollinatorApp
+import com.gauravaggarwal.pollinator.ui.components.AppOpenAdManager
+import com.google.android.gms.ads.MobileAds
 
 class MainActivity : ComponentActivity() {
+    private lateinit var appOpenAdManager: AppOpenAdManager
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        
+        // Initialize App Open Ad Manager
+        appOpenAdManager = AppOpenAdManager(application)
+        appOpenAdManager.loadAd()
+        
         setContent {
             PollinatorTheme {
                 Surface(

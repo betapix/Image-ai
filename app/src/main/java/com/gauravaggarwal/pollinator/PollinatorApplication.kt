@@ -14,25 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Pollinator. If not, see <https://www.gnu.org/licenses/>.
  */
-package com.gauravaggarwal.pollinator.ui
+package com.gauravaggarwal.pollinator
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
-import com.gauravaggarwal.pollinator.data.GenerationRepository
-import com.gauravaggarwal.pollinator.ui.screens.PollinatorScreen
-import com.gauravaggarwal.pollinator.ui.screens.PollinatorViewModel
+import android.app.Application
+import com.google.android.gms.ads.MobileAds
 
-@Composable
-fun PollinatorApp(
-    repository: GenerationRepository
-) {
-    val context = LocalContext.current
-    val pollinatorViewModel = PollinatorViewModel(repository)
+class PollinatorApplication : Application() {
     
-    LaunchedEffect(Unit) {
-        pollinatorViewModel.initializeAds(context)
+    override fun onCreate() {
+        super.onCreate()
+        
+        // Initialize AdMob
+        MobileAds.initialize(this) {}
     }
-    
-    PollinatorScreen(pollinatorViewModel = pollinatorViewModel)
 }

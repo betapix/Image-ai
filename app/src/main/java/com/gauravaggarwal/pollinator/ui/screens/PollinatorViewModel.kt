@@ -16,6 +16,7 @@
  */
 package com.gauravaggarwal.pollinator.ui.screens
 
+import android.app.WallpaperManager
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
@@ -30,6 +31,8 @@ import com.gauravaggarwal.pollinator.data.GenerationRepository
 import com.gauravaggarwal.pollinator.model.GenerationParameters
 import com.gauravaggarwal.pollinator.model.GenerationResult
 import com.gauravaggarwal.pollinator.model.Model
+import com.gauravaggarwal.pollinator.ui.components.InterstitialAdManager
+import com.gauravaggarwal.pollinator.ui.components.RewardedAdManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -41,6 +44,10 @@ class PollinatorViewModel(
 ) :  ViewModel() {
     private val _uiState = MutableStateFlow(PollinatorUiState())
     val uiState: StateFlow<PollinatorUiState> = _uiState
+    
+    private var interstitialAdManager: InterstitialAdManager? = null
+    private var rewardedAdManager: RewardedAdManager? = null
+    private var adCounter = 0
 
     fun onPromptChanged(newPrompt: String) {
         _uiState.update { currentState ->
@@ -76,6 +83,21 @@ class PollinatorViewModel(
 
     fun saveImage(context: Context) {
         if (_uiState.value.bitmap != null) {
+            val manager = interstitialAdManager
+            if (manager != null && manager.isAdLoaded()) {
+                // Show ad; on dismiss/fail proceed to save
+                manager.showAd {
+                    performImageSave(context)
+                }
+            } else {
+                // Ad not ready: proceed without ad
+                performImageSave(context)
+            }
+        }
+    }
+    
+    private fun performImageSave(context: Context) {
+        if (_uiState.value.bitmap != null) {
             saveBitmap(
                 context,
                 _uiState.value.bitmap!!,
@@ -83,11 +105,52 @@ class PollinatorViewModel(
                 "image/png",
                 "pollinator_${System.currentTimeMillis()}.png"
             )
-            // TODO : add save verification
             val text = context.getString(R.string.image_saved)
             val duration = Toast.LENGTH_SHORT
-            val toast = Toast.makeText(context, text, duration) // in Activity
+            val toast = Toast.makeText(context, text, duration)
             toast.show()
+        }
+        closeDisplay()
+    }
+
+    fun setAsWallpaper(context: Context) {
+        if (_uiState.value.bitmap != null) {
+            // Strict when available, fallback to proceed if no ad from server
+            val manager = rewardedAdManager
+            if (manager != null && manager.isAdLoaded()) {
+                manager.showAd(
+                    onRewardEarned = {
+                        performWallpaperSet(context)
+                    },
+                    onAdClosed = {
+                        // If user didn't earn reward (closed), do not set.
+                        val text = context.getString(R.string.watch_full_ad_to_set_wallpaper)
+                        Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+                    }
+                )
+            } else {
+                // No ad from server: proceed without ad
+                performWallpaperSet(context)
+            }
+        }
+    }
+    
+    private fun performWallpaperSet(context: Context) {
+        if (_uiState.value.bitmap != null) {
+            try {
+                val wallpaperManager = WallpaperManager.getInstance(context)
+                wallpaperManager.setBitmap(_uiState.value.bitmap)
+                
+                val text = context.getString(R.string.wallpaper_set)
+                val duration = Toast.LENGTH_SHORT
+                val toast = Toast.makeText(context, text, duration)
+                toast.show()
+            } catch (e: Exception) {
+                val text = context.getString(R.string.wallpaper_error)
+                val duration = Toast.LENGTH_SHORT
+                val toast = Toast.makeText(context, text, duration)
+                toast.show()
+            }
         }
         closeDisplay()
     }
@@ -150,6 +213,12 @@ class PollinatorViewModel(
                 isError = false,
                 errorMessage = null,
             )
+        }
+        
+        // Show interstitial ad after every 2nd image generation
+        adCounter++
+        if (adCounter % 2 == 0) {
+            interstitialAdManager?.showAd()
         }
     }
 
@@ -259,5 +328,13 @@ class PollinatorViewModel(
                 errorMessage = null,
             )
         }
+    }
+    
+    fun initializeAds(context: Context) {
+        interstitialAdManager = InterstitialAdManager(context)
+        interstitialAdManager?.loadAd()
+        
+        rewardedAdManager = RewardedAdManager(context)
+        rewardedAdManager?.loadAd()
     }
 }

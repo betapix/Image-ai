@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.gauravaggarwal.pollinator.R
 import com.gauravaggarwal.pollinator.data.PollinationsAiRepository
+import com.gauravaggarwal.pollinator.ui.components.AdBanner
 
 private const val CHARACTER_LIMIT = 400
 
@@ -147,6 +148,11 @@ fun PollinatorScreen(
             ) {
                 Text(stringResource(R.string.label_pollinate))
             }
+
+            // Banner Ad
+            AdBanner(
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
