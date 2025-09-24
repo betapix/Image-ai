@@ -18,13 +18,19 @@ package com.gauravaggarwal.pollinator
 
 import android.app.Application
 import com.google.android.gms.ads.MobileAds
+import com.gauravaggarwal.pollinator.ui.components.AppOpenAdManager
 
 class PollinatorApplication : Application() {
+    lateinit var appOpenAdManager: AppOpenAdManager
     
     override fun onCreate() {
         super.onCreate()
         
         // Initialize AdMob
         MobileAds.initialize(this) {}
+
+        // Initialize and load App Open Ad at app start
+        appOpenAdManager = AppOpenAdManager(this)
+        appOpenAdManager.loadAd()
     }
 }

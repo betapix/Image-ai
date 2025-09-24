@@ -84,6 +84,14 @@ fun AdvancedOptions(
             )
         }
 
+        // Wallpaper Presets
+        WallpaperPresetDropdown(
+            onPresetSelected = { preset ->
+                pollinatorViewModel.onWidthChanged(preset.width)
+                pollinatorViewModel.onHeightChanged(preset.height)
+            }
+        )
+
         SeedTextField(
             value = imageGeneratorUiState.seed?.toString() ?: "",
             label = stringResource(R.string.label_seed),
@@ -164,7 +172,8 @@ fun SizeDropdown(
     label: String
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val sizes = Sizes.getSizeList()
+    val sizes = Sizes.getLabeledSizeList()
+    val currentLabel = sizes.firstOrNull { it.value == selectedSize }?.label ?: selectedSize.toString()
 
     Column(modifier = modifier) {
         Text(
@@ -186,7 +195,7 @@ fun SizeDropdown(
                 .padding(vertical = 16.dp)
         ) {
             Text(
-                text =  selectedSize.toString(),
+                text =  currentLabel,
                 modifier = Modifier.align(Alignment.Center)
             )
             androidx.compose.material3.DropdownMenu(
@@ -196,15 +205,71 @@ fun SizeDropdown(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
-                sizes.forEach { size ->
+                sizes.forEach { sizeOption ->
                     androidx.compose.material3.DropdownMenuItem(
                         text = { Text(
-                                text = size.toString(),
+                                text = sizeOption.label,
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center
                             ) },
                         onClick = {
-                            onSizeSelected(size)
+                            onSizeSelected(sizeOption.value)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WallpaperPresetDropdown(
+    modifier: Modifier = Modifier,
+    onPresetSelected: (Sizes.Companion.WallpaperPreset) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val presets = Sizes.getWallpaperPresets()
+
+    Column(modifier = modifier) {
+        Text(
+            text = "Wallpaper Preset",
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(start = 4.dp)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = true }
+                .background(Color.Black)
+                .border(
+                    1.dp,
+                    Color.LightGray,
+                    shape = MaterialTheme.shapes.extraSmall
+                )
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Select",
+                modifier = Modifier.align(Alignment.Center)
+            )
+            androidx.compose.material3.DropdownMenu(
+                expanded = expanded,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Black),
+                onDismissRequest = { expanded = false }
+            ) {
+                presets.forEach { preset ->
+                    androidx.compose.material3.DropdownMenuItem(
+                        text = { Text(
+                                text = preset.label,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            ) },
+                        onClick = {
+                            onPresetSelected(preset)
                             expanded = false
                         }
                     )

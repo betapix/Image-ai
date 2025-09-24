@@ -44,7 +44,7 @@ class AppOpenAdManager(private val application: Application) : DefaultLifecycleO
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
         // Show ad when app comes to foreground
-        showAdIfAvailable()
+        showIfAvailable()
     }
     
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
@@ -85,6 +85,10 @@ class AppOpenAdManager(private val application: Application) : DefaultLifecycleO
                     appOpenAd = ad
                     isLoading = false
                     loadTime = Date().time
+                    // If app is already in foreground, try showing immediately
+                    if (!isShowingAd) {
+                        showIfAvailable()
+                    }
                 }
                 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
@@ -94,7 +98,7 @@ class AppOpenAdManager(private val application: Application) : DefaultLifecycleO
         )
     }
     
-    private fun showAdIfAvailable() {
+    fun showIfAvailable() {
         // Only show ad if there is not already an app open ad currently showing
         // and an ad is available.
         if (!isShowingAd && isAdAvailable()) {

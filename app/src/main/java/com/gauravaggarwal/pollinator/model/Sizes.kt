@@ -27,12 +27,36 @@ private val sizes = listOf(
 
 class Sizes {
     companion object {
+        data class SizeOption(val label: String, val value: Int)
+        data class WallpaperPreset(val label: String, val width: Int, val height: Int)
+
         fun getSizeList(): List<Int> {
             return sizes
         }
 
         fun getDefaultSize(): Int {
             return DEFAULT
+        }
+
+        fun getLabeledSizeList(): List<SizeOption> {
+            return listOf(
+                SizeOption(label = "Logo (512)", value = 512),
+                SizeOption(label = "Thumbnail (640)", value = 640),
+                SizeOption(label = "Small (720)", value = 720),
+                SizeOption(label = "Medium (768)", value = 768),
+                SizeOption(label = "Large (1024)", value = 1024),
+            )
+        }
+
+        fun getWallpaperPresets(): List<WallpaperPreset> {
+            return listOf(
+                WallpaperPreset(label = "Wallpaper (720x1280 • HD)", width = 720, height = 1280),
+                WallpaperPreset(label = "Wallpaper (1080x2340 • FHD+)", width = 1080, height = 2340),
+                WallpaperPreset(label = "Wallpaper (1080x2400 • FHD+)", width = 1080, height = 2400),
+                WallpaperPreset(label = "Wallpaper (1440x2960 • QHD+)", width = 1440, height = 2960),
+                WallpaperPreset(label = "Wallpaper (1440x3040 • QHD+)", width = 1440, height = 3040),
+                WallpaperPreset(label = "Wallpaper (2160x3840 • 4K UHD)", width = 2160, height = 3840),
+            )
         }
     }
 }

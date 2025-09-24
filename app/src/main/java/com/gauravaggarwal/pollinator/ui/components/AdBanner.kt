@@ -16,7 +16,8 @@
  */
 package com.gauravaggarwal.pollinator.ui.components
 
-import android.content.Context
+import android.app.Activity
+import android.util.DisplayMetrics
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,9 +38,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
+import kotlinx.coroutines.delay
 
 @Composable
 fun AdBanner(
@@ -47,14 +50,43 @@ fun AdBanner(
     adUnitId: String = "ca-app-pub-3940256099942544/6300978111" // Test Ad Unit ID
 ) {
     val context = LocalContext.current
+    val activity = context as? Activity
     var adView by remember { mutableStateOf<AdView?>(null) }
+    var adHeightDp by remember { mutableStateOf(0) }
+    var reloadKey by remember { mutableStateOf(0) }
 
-    LaunchedEffect(Unit) {
-        adView = AdView(context).apply {
-            setAdSize(AdSize.BANNER)
+    // Helper to compute adaptive ad size based on screen width
+    fun computeAdaptiveAdSize(): AdSize? {
+        val act = activity ?: return null
+        val displayMetrics = DisplayMetrics()
+        act.windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val density = displayMetrics.density
+        val adWidthPixels = displayMetrics.widthPixels
+        val adWidthDp = (adWidthPixels / density).toInt()
+        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(act, adWidthDp)
+    }
+
+    LaunchedEffect(reloadKey) {
+        val size = computeAdaptiveAdSize()
+        if (size == null) return@LaunchedEffect
+        adHeightDp = (size.getHeightInPixels(context) / context.resources.displayMetrics.density).toInt()
+
+        val view = AdView(context).apply {
+            setAdSize(size)
             this.adUnitId = adUnitId
-            loadAd(AdRequest.Builder().build())
+            adListener = object : AdListener() {
+                override fun onAdFailedToLoad(error: com.google.android.gms.ads.LoadAdError) {
+                    // retry after a short delay
+                    // simple backoff could be added if needed
+                    LaunchedEffect(Unit) {
+                        delay(2000)
+                        reloadKey++
+                    }
+                }
+            }
         }
+        adView = view
+        view.loadAd(AdRequest.Builder().build())
     }
 
     Column(
@@ -73,11 +105,12 @@ fun AdBanner(
         
         // Ad Banner
         adView?.let { ad ->
+            val height = if (adHeightDp > 0) adHeightDp.dp else 50.dp
             AndroidView(
                 factory = { ad },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
+                    .height(height)
             )
         }
     }

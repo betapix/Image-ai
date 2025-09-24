@@ -59,7 +59,7 @@ import com.gauravaggarwal.pollinator.R
 import com.gauravaggarwal.pollinator.data.PollinationsAiRepository
 import com.gauravaggarwal.pollinator.ui.components.AdBanner
 
-private const val CHARACTER_LIMIT = 400
+private const val CHARACTER_LIMIT = 1000
 
 @Composable
 fun PollinatorScreen(
