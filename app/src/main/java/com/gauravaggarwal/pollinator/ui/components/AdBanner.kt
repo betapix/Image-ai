@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,6 +44,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun AdBanner(
@@ -54,6 +56,7 @@ fun AdBanner(
     var adView by remember { mutableStateOf<AdView?>(null) }
     var adHeightDp by remember { mutableStateOf(0) }
     var reloadKey by remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
 
     // Helper to compute adaptive ad size based on screen width
     fun computeAdaptiveAdSize(): AdSize? {
@@ -76,9 +79,8 @@ fun AdBanner(
             this.adUnitId = adUnitId
             adListener = object : AdListener() {
                 override fun onAdFailedToLoad(error: com.google.android.gms.ads.LoadAdError) {
-                    // retry after a short delay
-                    // simple backoff could be added if needed
-                    LaunchedEffect(Unit) {
+                    // retry after a short delay using coroutine scope
+                    scope.launch {
                         delay(2000)
                         reloadKey++
                     }
