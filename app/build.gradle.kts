@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.okhttp)
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     // Appnext SDKs
     implementation("com.appnext.sdk:ads:2.7.6.473")
     implementation("com.appnext.sdk:banners:2.7.6.473")
