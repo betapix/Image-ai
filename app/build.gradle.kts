@@ -68,9 +68,7 @@ dependencies {
     implementation("com.appnext.sdk:ads:2.7.6.473")
     implementation("com.appnext.sdk:banners:2.7.6.473")
     implementation("com.appnext.sdk:native-ads2:2.7.6.473")
-    // AdMob adapter (optional, for mediation)
-    implementation("com.Appnext.sdk.adapters:admob-ads:2.7.6.473")
-    implementation("com.Appnext.sdk.adapters:admob-banners:2.7.6.473")
+    // AdMob mediation adapters for Appnext are not available in public repos; removed to fix build
     
     // AdMob dependencies
     implementation("com.google.android.gms:play-services-ads:22.6.0")
