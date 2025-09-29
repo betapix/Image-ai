@@ -27,6 +27,8 @@ import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 class RewardedAdManager(private val context: Context) {
     private var rewardedAd: RewardedAd? = null
     private val adUnitId = "ca-app-pub-3940256099942544/5224354917" // Test Rewarded Ad Unit ID
+    private val appnextPlacementId = "8546bc6c-79c9-4051-9194-e2e7d46a4d67"
+    private val appnextInterstitial by lazy { AppnextInterstitialManager(context, appnextPlacementId) }
 
     fun loadAd() {
         val adRequest = AdRequest.Builder().build()
@@ -45,6 +47,8 @@ class RewardedAdManager(private val context: Context) {
                 }
             }
         )
+        // Also preload Appnext as fallback
+        appnextInterstitial.loadAd()
     }
 
     fun showAd(onRewardEarned: () -> Unit, onAdClosed: () -> Unit = {}) {
@@ -59,7 +63,14 @@ class RewardedAdManager(private val context: Context) {
 
                 override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                     rewardedAd = null
-                    onAdClosed()
+                    // Try Appnext fallback
+                    if (appnextInterstitial.isAdLoaded()) {
+                        appnextInterstitial.showAd {
+                            onAdClosed()
+                        }
+                    } else {
+                        onAdClosed()
+                    }
                 }
             }
             
@@ -68,7 +79,14 @@ class RewardedAdManager(private val context: Context) {
                 onRewardEarned()
             }
         } ?: run {
-            onAdClosed()
+            // AdMob not ready → try Appnext fallback
+            if (appnextInterstitial.isAdLoaded()) {
+                appnextInterstitial.showAd {
+                    onAdClosed()
+                }
+            } else {
+                onAdClosed()
+            }
         }
     }
 

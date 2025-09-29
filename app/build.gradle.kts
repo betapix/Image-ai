@@ -64,6 +64,13 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.okhttp)
+    // Appnext SDKs
+    implementation("com.appnext.sdk:ads:2.7.6.473")
+    implementation("com.appnext.sdk:banners:2.7.6.473")
+    implementation("com.appnext.sdk:native-ads2:2.7.6.473")
+    // AdMob adapter (optional, for mediation)
+    implementation("com.Appnext.sdk.adapters:admob-ads:2.7.6.473")
+    implementation("com.Appnext.sdk.adapters:admob-banners:2.7.6.473")
     
     // AdMob dependencies
     implementation("com.google.android.gms:play-services-ads:22.6.0")

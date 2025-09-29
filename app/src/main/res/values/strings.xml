@@ -20,4 +20,11 @@
     <string name="ad_not_ready_try_again">Ad not ready yet. Please try again.</string>
     <string name="no_image_found">No image found!</string>
     <string name="app_logo">App Logo</string>
+    <string name="settings">Settings</string>
+    <string name="share_app">Share App</string>
+    <string name="contact_developer">Contact Developer</string>
+    <string name="share_message">Check out this app: https://play.google.com/store/apps/details?id=com.gauravaggarwal.pollinator</string>
+    <string name="email_subject">Pollinator Support</string>
+    <string name="email_to">beta.ae.dev@gmail.com</string>
+    <string name="email_chooser">Send email via</string>
 </resources>

@@ -149,7 +149,7 @@ fun PollinatorScreen(
                 Text(stringResource(R.string.label_pollinate))
             }
 
-            // Banner Ad
+            // Banner: Appnext Suggested Apps with AdMob fallback
             AdBanner(
                 modifier = Modifier.padding(vertical = 8.dp)
             )

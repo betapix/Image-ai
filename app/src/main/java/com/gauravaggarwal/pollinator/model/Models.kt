@@ -22,18 +22,12 @@ class Models {
     companion object {
         private val DEFAULT =  Model("Default", "default" )
         private val FLUX =  Model("Flux", "flux")
-        private val KONTEXT =  Model("Kontext", "kontext")
         private val TURBO =  Model("Turbo", "turbo")
-        private val NANOBANANA =  Model("Nanobanana", "nanobanana")
-        private val SEEDREAM =  Model("Seedream", "seedream")
 
         private val models = listOf(
             DEFAULT,
             FLUX,
-            KONTEXT,
             TURBO,
-            NANOBANANA,
-            SEEDREAM,
         )
 
         fun getModelList(): List<Model> {

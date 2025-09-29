@@ -43,77 +43,94 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
+import com.appnext.nativeads.designed_native_ads.views.AppnextDesignedNativeAdView
+import com.appnext.nativeads.designed_native_ads.listeners.AppnextDesignedNativeAdViewCallbacks
+import com.appnext.nativeads.designed_native_ads.objects.AppnextDesignedNativeAdData
+import com.appnext.core.AppnextError
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun AdBanner(
     modifier: Modifier = Modifier,
-    adUnitId: String = "ca-app-pub-3940256099942544/6300978111" // Test Ad Unit ID
+    adUnitId: String = "",
+    appnextPlacementId: String = "8546bc6c-79c9-4051-9194-e2e7d46a4d67"
 ) {
     val context = LocalContext.current
-    val activity = context as? Activity
-    var adView by remember { mutableStateOf<AdView?>(null) }
-    var adHeightDp by remember { mutableStateOf(0) }
-    var reloadKey by remember { mutableStateOf(0) }
-    val scope = rememberCoroutineScope()
+    var showAdmob by remember { mutableStateOf(false) }
 
-    // Helper to compute adaptive ad size based on screen width
-    fun computeAdaptiveAdSize(): AdSize? {
-        val act = activity ?: return null
-        val displayMetrics = DisplayMetrics()
-        act.windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val density = displayMetrics.density
-        val adWidthPixels = displayMetrics.widthPixels
-        val adWidthDp = (adWidthPixels / density).toInt()
-        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(act, adWidthDp)
-    }
+    if (showAdmob) {
+        // Fallback to AdMob banner
+        val activity = context as? Activity
+        var adView by remember { mutableStateOf<AdView?>(null) }
+        var adHeightDp by remember { mutableStateOf(0) }
+        var reloadKey by remember { mutableStateOf(0) }
+        val scope = rememberCoroutineScope()
 
-    LaunchedEffect(reloadKey) {
-        val size = computeAdaptiveAdSize()
-        if (size == null) return@LaunchedEffect
-        adHeightDp = (size.getHeightInPixels(context) / context.resources.displayMetrics.density).toInt()
+        fun computeAdaptiveAdSize(): AdSize? {
+            val act = activity ?: return null
+            val displayMetrics = DisplayMetrics()
+            act.windowManager.defaultDisplay.getMetrics(displayMetrics)
+            val density = displayMetrics.density
+            val adWidthPixels = displayMetrics.widthPixels
+            val adWidthDp = (adWidthPixels / density).toInt()
+            return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(act, adWidthDp)
+        }
 
-        val view = AdView(context).apply {
-            setAdSize(size)
-            this.adUnitId = adUnitId
-            adListener = object : AdListener() {
-                override fun onAdFailedToLoad(error: com.google.android.gms.ads.LoadAdError) {
-                    // retry after a short delay using coroutine scope
-                    scope.launch {
-                        delay(2000)
-                        reloadKey++
+        LaunchedEffect(reloadKey) {
+            val size = computeAdaptiveAdSize() ?: return@LaunchedEffect
+            adHeightDp = (size.getHeightInPixels(context) / context.resources.displayMetrics.density).toInt()
+
+            val view = AdView(context).apply {
+                setAdSize(size)
+                this.adUnitId = adUnitId.ifBlank { "ca-app-pub-3940256099942544/6300978111" }
+                adListener = object : AdListener() {
+                    override fun onAdFailedToLoad(error: com.google.android.gms.ads.LoadAdError) {
+                        scope.launch {
+                            delay(2000)
+                            reloadKey++
+                        }
                     }
                 }
             }
+            adView = view
+            view.loadAd(AdRequest.Builder().build())
         }
-        adView = view
-        view.loadAd(AdRequest.Builder().build())
+
+        Column(
+            modifier = modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            adView?.let { ad ->
+                val height = if (adHeightDp > 0) adHeightDp.dp else 50.dp
+                AndroidView(
+                    factory = { ad },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(height)
+                )
+            }
+        }
+        return
     }
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Ad Label
-        Text(
-            text = "Advertisement",
-            style = MaterialTheme.typography.labelSmall,
-            color = Color.Gray,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 4.dp)
-        )
-        
-        // Ad Banner
-        adView?.let { ad ->
-            val height = if (adHeightDp > 0) adHeightDp.dp else 50.dp
-            AndroidView(
-                factory = { ad },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(height)
-            )
+    // Try Appnext Suggested Apps first (height 100dp available)
+    AndroidView(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(100.dp),
+        factory = { ctx ->
+            val view = AppnextDesignedNativeAdView(ctx)
+            view.load(appnextPlacementId, object : AppnextDesignedNativeAdViewCallbacks {
+                override fun onAppnextAdsLoadedSuccessfully() { /* shown */ }
+                override fun onAdClicked(appnextDesignedNativeAdData: AppnextDesignedNativeAdData) { }
+                override fun onAppnextAdsError(error: AppnextError) {
+                    // Fallback to AdMob
+                    showAdmob = true
+                }
+            })
+            view
         }
-    }
+    )
 }

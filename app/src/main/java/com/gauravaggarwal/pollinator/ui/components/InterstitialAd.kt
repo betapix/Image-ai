@@ -26,6 +26,8 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 class InterstitialAdManager(private val context: Context) {
     private var interstitialAd: InterstitialAd? = null
     private val adUnitId = "ca-app-pub-3940256099942544/1033173712" // Test Ad Unit ID
+    private val appnextPlacementId = "8546bc6c-79c9-4051-9194-e2e7d46a4d67"
+    private val appnextInterstitial by lazy { AppnextInterstitialManager(context, appnextPlacementId) }
 
     fun loadAd() {
         val adRequest = AdRequest.Builder().build()
@@ -44,6 +46,8 @@ class InterstitialAdManager(private val context: Context) {
                 }
             }
         )
+        // Also preload Appnext as fallback
+        appnextInterstitial.loadAd()
     }
 
     fun showAd(onAdClosed: () -> Unit = {}) {
@@ -58,12 +62,26 @@ class InterstitialAdManager(private val context: Context) {
 
                 override fun onAdFailedToShowFullScreenContent(adError: com.google.android.gms.ads.AdError) {
                     interstitialAd = null
-                    // Proceed with action if ad failed to show
-                    onAdClosed()
-                    loadAd()
+                    // Try Appnext fallback
+                    if (appnextInterstitial.isAdLoaded()) {
+                        appnextInterstitial.showAd {
+                            onAdClosed()
+                        }
+                    } else {
+                        onAdClosed()
+                    }
                 }
             }
             ad.show(context as androidx.activity.ComponentActivity)
+        } ?: run {
+            // AdMob not ready → try Appnext fallback
+            if (appnextInterstitial.isAdLoaded()) {
+                appnextInterstitial.showAd {
+                    onAdClosed()
+                }
+            } else {
+                onAdClosed()
+            }
         }
     }
 

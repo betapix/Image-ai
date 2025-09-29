@@ -18,10 +18,10 @@ package com.gauravaggarwal.pollinator
 
 import android.app.Application
 import com.google.android.gms.ads.MobileAds
-import com.gauravaggarwal.pollinator.ui.components.AppOpenAdManager
+import com.gauravaggarwal.pollinator.ui.components.OpenCloseAdsManager
 
 class PollinatorApplication : Application() {
-    lateinit var appOpenAdManager: AppOpenAdManager
+    lateinit var openCloseAdsManager: OpenCloseAdsManager
     
     override fun onCreate() {
         super.onCreate()
@@ -29,8 +29,7 @@ class PollinatorApplication : Application() {
         // Initialize AdMob
         MobileAds.initialize(this) {}
 
-        // Initialize and load App Open Ad at app start
-        appOpenAdManager = AppOpenAdManager(this)
-        appOpenAdManager.loadAd()
+        // Initialize open/close ads manager with Appnext placement
+        openCloseAdsManager = OpenCloseAdsManager(this, "8546bc6c-79c9-4051-9194-e2e7d46a4d67")
     }
 }
