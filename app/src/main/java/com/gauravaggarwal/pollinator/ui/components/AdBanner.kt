@@ -43,9 +43,6 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
-import com.appnext.banners.BannerAd
-import com.appnext.banners.BannerListener
-import com.appnext.banners.BannerSize
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -56,7 +53,6 @@ fun AdBanner(
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
-    var showAdMob by remember { mutableStateOf(false) }
     var adView by remember { mutableStateOf<AdView?>(null) }
     var adHeightDp by remember { mutableStateOf(0) }
     var reloadKey by remember { mutableStateOf(0) }
@@ -73,26 +69,6 @@ fun AdBanner(
     }
 
     LaunchedEffect(reloadKey) {
-        // Try Appnext first
-        if (!showAdMob && activity != null) {
-            val appnextBanner = BannerAd(activity)
-            appnextBanner.setPlacementId("8546bc6c-79c9-4051-9194-e2e7d46a4d67")
-            appnextBanner.setBannerSize(BannerSize.BANNER)
-            appnextBanner.setBannerListener(object : BannerListener() {
-                override fun onAdLoaded() {
-                    // Render Appnext banner via AndroidView
-                }
-                override fun onError(error: String?) {
-                    showAdMob = true
-                }
-            })
-            try { appnextBanner.loadAd() } catch (_: Exception) { showAdMob = true }
-        } else {
-            showAdMob = true
-        }
-
-        if (!showAdMob) return@LaunchedEffect
-
         val size = computeAdaptiveAdSize() ?: return@LaunchedEffect
         adHeightDp = (size.getHeightInPixels(context) / context.resources.displayMetrics.density).toInt()
 
@@ -117,20 +93,6 @@ fun AdBanner(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        if (!showAdMob) {
-            AndroidView(
-                factory = { ctx ->
-                    val banner = BannerAd(activity)
-                    banner.setPlacementId("8546bc6c-79c9-4051-9194-e2e7d46a4d67")
-                    banner.setBannerSize(BannerSize.BANNER)
-                    banner
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-            )
-        }
-
         adView?.let { ad ->
             val height = if (adHeightDp > 0) adHeightDp.dp else 50.dp
             AndroidView(
