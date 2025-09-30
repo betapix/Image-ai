@@ -51,6 +51,15 @@ class InterstitialAdManager(private val context: Context) {
     }
 
     fun showAd(onAdClosed: () -> Unit = {}) {
+        // Appnext first
+        if (appnextInterstitial.isAdLoaded()) {
+            appnextInterstitial.showAd {
+                onAdClosed()
+            }
+            return
+        }
+
+        // Fallback: AdMob
         interstitialAd?.let { ad ->
             ad.fullScreenContentCallback = object : FullScreenContentCallback() {
                 override fun onAdDismissedFullScreenContent() {
@@ -62,26 +71,12 @@ class InterstitialAdManager(private val context: Context) {
 
                 override fun onAdFailedToShowFullScreenContent(adError: com.google.android.gms.ads.AdError) {
                     interstitialAd = null
-                    // Try Appnext fallback
-                    if (appnextInterstitial.isAdLoaded()) {
-                        appnextInterstitial.showAd {
-                            onAdClosed()
-                        }
-                    } else {
-                        onAdClosed()
-                    }
+                    onAdClosed()
                 }
             }
             ad.show(context as androidx.activity.ComponentActivity)
         } ?: run {
-            // AdMob not ready → try Appnext fallback
-            if (appnextInterstitial.isAdLoaded()) {
-                appnextInterstitial.showAd {
-                    onAdClosed()
-                }
-            } else {
-                onAdClosed()
-            }
+            onAdClosed()
         }
     }
 

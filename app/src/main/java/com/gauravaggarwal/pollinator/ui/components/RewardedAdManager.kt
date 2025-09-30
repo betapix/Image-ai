@@ -52,6 +52,16 @@ class RewardedAdManager(private val context: Context) {
     }
 
     fun showAd(onRewardEarned: () -> Unit, onAdClosed: () -> Unit = {}) {
+        // Appnext first (no reward callback available; treat as gate if it shows)
+        if (appnextInterstitial.isAdLoaded()) {
+            appnextInterstitial.showAd {
+                // Considered completed
+                onRewardEarned()
+            }
+            return
+        }
+
+        // Fallback: AdMob rewarded
         rewardedAd?.let { ad ->
             ad.fullScreenContentCallback = object : FullScreenContentCallback() {
                 override fun onAdDismissedFullScreenContent() {
@@ -63,30 +73,15 @@ class RewardedAdManager(private val context: Context) {
 
                 override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                     rewardedAd = null
-                    // Try Appnext fallback
-                    if (appnextInterstitial.isAdLoaded()) {
-                        appnextInterstitial.showAd {
-                            onAdClosed()
-                        }
-                    } else {
-                        onAdClosed()
-                    }
+                    onAdClosed()
                 }
             }
             
             ad.show(context as androidx.activity.ComponentActivity) { rewardItem ->
-                // User earned reward
                 onRewardEarned()
             }
         } ?: run {
-            // AdMob not ready → try Appnext fallback
-            if (appnextInterstitial.isAdLoaded()) {
-                appnextInterstitial.showAd {
-                    onAdClosed()
-                }
-            } else {
-                onAdClosed()
-            }
+            onAdClosed()
         }
     }
 

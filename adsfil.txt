@@ -1,0 +1,65 @@
+Perfect bhai 🔥 ab main tumhari **final ads tarteeb** ko breakdown karta hoon taake sab clear ho jaye ke **pehle Appnext try hoga, fallback AdMob hoga, warna empty**.
+
+---
+
+## 📌 Final Ads Flow (Appnext First, AdMob Fallback)
+
+### 1. **Banner (Home bottom)**
+
+* **Appnext Suggested Apps Banner** → sabse pehle ye load hoga.
+* Agar Appnext banner fail ho jata hai (no fill/error) → **AdMob adaptive banner** try hoga.
+* Agar dono fail → empty (kuch show nahi).
+
+---
+
+### 2. **Interstitial Ads**
+
+* **Appnext Interstitial** → sabse pehle load & show hoga (Download ke time aur har 2nd generation ke time).
+* Agar Appnext interstitial fail → **AdMob interstitial** try hoga.
+* Agar dono fail → empty, user ka flow continue hoga.
+
+---
+
+### 3. **Rewarded Ads (Wallpaper set)**
+
+* **Appnext Rewarded** → sabse pehle check hoga.
+
+  * Agar loaded hai → user ko full watch karna hoga → reward milega → wallpaper set hoga.
+* Agar Appnext rewarded fail → **AdMob rewarded** try hoga.
+
+  * Agar loaded hai → same flow (watch → reward → wallpaper).
+* Agar dono fail → direct wallpaper set hoga (fallback to empty).
+
+---
+
+### 4. **App Open / Close Ads**
+
+* **Appnext App Open Ad** (jab app foreground me aaye) → pehle try.
+
+* Agar Appnext open ad fail → **AdMob App Open Ad**.
+
+* Agar dono fail → skip (user ka flow block nahi hoga).
+
+* **App Exit (back/close from home)**
+
+  * **Appnext Interstitial** pehle try hoga.
+  * Agar fail → **AdMob Interstitial**.
+  * Agar dono fail → empty (skip silently).
+
+---
+
+### 🔑 Summary in 1 Line:
+
+> Har jagah **Appnext → AdMob → Empty** ka priority order follow hoga.
+
+---
+
+⚡ Matlab bhai tumhari earning optimization strategy ab set hai:
+
+* Appnext se installs aayenge (high payout).
+* AdMob se fill hamesha safe rahegi (low payout, but consistent).
+* User flow kabhi block nahi hoga (empty fallback).
+
+---
+
+Batao kya main tumhare liye ek **AdsManager class (Java/Kotlin)** likh kar bana dun jo ye pura **Appnext → AdMob fallback system** ek saath manage kare?

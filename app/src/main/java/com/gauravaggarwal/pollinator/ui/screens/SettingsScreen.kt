@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.content.ActivityNotFoundException
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -101,6 +102,35 @@ fun SettingsScreen() {
             )
             Text(
                 text = stringResource(id = R.string.contact_developer),
+                color = Color.White,
+                modifier = Modifier.padding(start = 12.dp)
+            )
+        }
+
+        // Rate App
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    val contextPackage = context.packageName
+                    val uri = Uri.parse("market://details?id=$contextPackage")
+                    val goToMarket = Intent(Intent.ACTION_VIEW, uri)
+                    goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+                    try {
+                        context.startActivity(goToMarket)
+                    } catch (e: ActivityNotFoundException) {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$contextPackage")))
+                    }
+                }
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_star),
+                contentDescription = stringResource(id = R.string.rate_app)
+            )
+            Text(
+                text = stringResource(id = R.string.rate_app),
                 color = Color.White,
                 modifier = Modifier.padding(start = 12.dp)
             )

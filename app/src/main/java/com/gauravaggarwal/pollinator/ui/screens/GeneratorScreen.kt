@@ -67,8 +67,14 @@ fun PollinatorScreen(
 ) {
     val imageGeneratorUiState by pollinatorViewModel.uiState.collectAsState()
     var showAdvancedOptions by remember { mutableStateOf(false) }
+    var showSettings by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     val focusManager = LocalFocusManager.current
+
+    if (showSettings) {
+        SettingsScreen()
+        return
+    }
 
     Box(
         modifier = Modifier
@@ -84,6 +90,16 @@ fun PollinatorScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Image(
+                    painter = painterResource(R.drawable.ic_settings),
+                    contentDescription = stringResource(R.string.settings),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(24.dp)
+                        .clickable { showSettings = true }
+                )
+            }
             Image(
                 painter = painterResource(R.drawable.bee_white_no_bg),
                 contentDescription = stringResource(R.string.app_logo),
